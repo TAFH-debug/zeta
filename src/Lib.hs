@@ -16,7 +16,7 @@ import qualified Discord.Requests as R
 pingpongExample :: IO ()
 pingpongExample = do
     userFacingError <- runDiscord $ def
-             { discordToken = "ODIxMzE1OTk3MTUwNDc4MzM3.Gazlrr.d2Q2FjuyhKe9DuBkwPhfeX4uzfrWDTY7pm2r4k"
+             { discordToken = ""
              , discordOnEvent = eventHandler
              , discordOnLog = \s -> TIO.putStrLn s >> TIO.putStrLn ""
              }
