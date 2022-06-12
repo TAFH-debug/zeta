@@ -52,11 +52,23 @@ startHandler = do
           }
   sendCommand (UpdateStatus opts)
 
+sayHello :: Maybe CreateApplicationCommand
+sayHello =
+    createChatInput
+        "sayhello"
+        "hello"
+        >>= \cac ->
+            return cac 
+
+sayHelloIR :: OptionsData -> InteractionResponse
+sayHelloIR a = 
+    interactionResponseBasic "Hello!"
+
 exampleSlashCommand :: Maybe CreateApplicationCommand
 exampleSlashCommand =
   createChatInput
     "suggest"
-    "here is a description"
+    "sends suggestion embed"
     >>= \cac ->
       return $
         cac
@@ -94,11 +106,7 @@ getAvatar (MemberOrUser (Left a)) = do
                 let hash = fromMaybe "" $ memberAvatar a
                     id = userId $ fromMaybe emptyUser $ memberUser a
                     url = pack $ "https://cdn.discordapp.com/avatars/"++show id++"/"++unpack hash++".png?size=512"
-                printLifted url
                 CreateEmbedImageUrl url
-
-printLifted :: MonadIO m => String -> m ()
-printLifted a = liftIO (putStrLn a)
 
 suggestIR :: OptionsData -> MemberOrUser -> InteractionResponse
 suggestIR (OptionsDataValues [OptionDataValueString {optionDataValueString = s1}, 
@@ -129,15 +137,14 @@ testserverid = 833626513756258315
 
 eventHandler :: Event -> DiscordHandler ()
 eventHandler event = case event of
-    MessageCreate m -> if not $ fromBot m
-        then
-            case messageContent m of
-                "wow" -> void $ restCall (R.CreateReaction (messageChannelId m, messageId m) ":eyes:")
-                "ping" -> void $ restCall (R.CreateMessage (messageChannelId m) "Pong!")
-                "hello" -> void $ restCall (R.CreateMessage (messageChannelId m) "Hi!")
-                _ -> return ()
-        else
-            return ()
+    MessageCreate m -> if (not $ fromBot m) then 
+                          case messageContent m of
+                            "wow" -> void $ restCall (R.CreateReaction (messageChannelId m, messageId m) ":eyes:")
+                            "ping" -> void $ restCall (R.CreateMessage (messageChannelId m) "Pong!")
+                            "hello" -> void $ restCall (R.CreateMessage (messageChannelId m) "Hi!")
+                            _ -> return ()
+                        else
+                            return ()
     Ready _ _ _ _ _ _ (PartialApplication i _) -> do
         vs <-
             mapM
